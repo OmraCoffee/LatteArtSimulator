@@ -9,18 +9,18 @@ let config = {
     SIM_RESOLUTION: 32,
     DYE_RESOLUTION: 1024,
     CAPTURE_RESOLUTION: 1024,
-    DENSITY_DISSIPATION: 2.0,
-    VELOCITY_DISSIPATION: 4.0,
+    DENSITY_DISSIPATION: 0.9,
+    VELOCITY_DISSIPATION: 1.8,
     PRESSURE: 0.5,
     PRESSURE_ITERATIONS: 20,
-    CURL: 0,
-    SPLAT_RADIUS: 0.2,
-    SPLAT_FORCE: 8000,
+    CURL: 24,
+    SPLAT_RADIUS: 0.14,
+    SPLAT_FORCE: 6200,
     SHADING: true,
     COLORFUL: false,
     COLOR_UPDATE_SPEED: 10,
     PAUSED: false,
-    BACK_COLOR: { r: 0, g: 0, b: 0 },
+    BACK_COLOR: { r: 101, g: 59, b: 39 },
     TRANSPARENT: false,
     BLOOM: false,
     BLOOM_ITERATIONS: 8,
@@ -49,6 +49,11 @@ function pointerPrototype () {
 let pointers = [];
 let splatStack = [];
 pointers.push(new pointerPrototype());
+let omraTool = 'milk';
+let omraHeight = 'low';
+let omraSpaceDown = false;
+let omraShiftDown = false;
+let omraLastDirection = null;
 
 const { gl, ext } = getWebGLContext(canvas);
 
@@ -102,8 +107,6 @@ function getWebGLContext (canvas) {
         formatR = getSupportedFormat(gl, gl.RGBA, gl.RGBA, halfFloatTexType);
     }
 
-    ga('send', 'event', isWebGL2 ? 'webgl2' : 'webgl', formatRGBA == null ? 'not supported' : 'supported');
-
     return {
         gl,
         ext: {
@@ -154,82 +157,7 @@ function supportRenderTextureFormat (gl, internalFormat, format, type) {
     return status == gl.FRAMEBUFFER_COMPLETE;
 }
 
-function startGUI () {
-    var gui = new dat.GUI({ width: 300 });
-    //gui.add(config, 'DYE_RESOLUTION', { 'high': 1024, 'medium': 512, 'low': 256, 'very low': 128 }).name('quality').onFinishChange(initFramebuffers);
-    //gui.add(config, 'SIM_RESOLUTION', { '32': 32, '64': 64, '128': 128, '256': 256 }).name('sim resolution').onFinishChange(initFramebuffers);
-    gui.add(config, 'DENSITY_DISSIPATION', 0, 4.0).name('Fade Speed');
-    gui.add(config, 'VELOCITY_DISSIPATION', 0, 8.0).name('Consistency');
-    //gui.add(config, 'PRESSURE', 0.0, 1.0).name('pressure');
-    //gui.add(config, 'CURL', 0, 50).name('vorticity').step(1);
-    gui.add(config, 'SPLAT_RADIUS', 0.01, 1.0).name('Flow Rate');
-    //gui.add(config, 'SHADING').name('shading').onFinishChange(updateKeywords);
-    gui.add(config, 'COLORFUL').name('Colorful');
-    //gui.add(config, 'PAUSED').name('paused').listen();
-
-    gui.add({ fun: () => {
-        splatStack.push(parseInt(Math.random() * 20) + 2);
-    } }, 'fun').name('Random Pours');
-
-    //let bloomFolder = gui.addFolder('Bloom');
-    //bloomFolder.add(config, 'BLOOM').name('enabled').onFinishChange(updateKeywords);
-    //bloomFolder.add(config, 'BLOOM_INTENSITY', 0.1, 2.0).name('intensity');
-    //bloomFolder.add(config, 'BLOOM_THRESHOLD', 0.0, 1.0).name('threshold');
-
-    //let sunraysFolder = gui.addFolder('Sunrays');
-    //sunraysFolder.add(config, 'SUNRAYS').name('enabled').onFinishChange(updateKeywords);
-    //sunraysFolder.add(config, 'SUNRAYS_WEIGHT', 0.3, 1.0).name('weight');
-
-    let captureFolder = gui.addFolder('Capture');
-    captureFolder.addColor(config, 'BACK_COLOR').name('background color');
-    captureFolder.add(config, 'TRANSPARENT').name('transparent');
-    captureFolder.add({ fun: captureScreenshot }, 'fun').name('take screenshot');
-
-    
-            let instagram = gui.add({ fun : () => {
-        ga('send', 'event', 'link button', 'instagram');
-        window.open('https://instagram.com/omra.coffee/');
-    } }, 'fun').name('Instagram');
-    instagram.__li.className = 'cr function bigFont';
-    instagram.__li.style.borderLeft = '3px solid #8C8C8C';
-    let instagramIcon = document.createElement('span');
-    instagram.domElement.parentElement.appendChild(instagramIcon);
-    instagramIcon.className = 'icon instagram';
-    
-            let linkedin = gui.add({ fun : () => {
-        ga('send', 'event', 'link button', 'linkedin');
-        window.open('https://www.linkedin.com/company/%C3%B3mra-coffee-ltd/');
-    } }, 'fun').name('Linkedin');
-    linkedin.__li.className = 'cr function bigFont';
-    linkedin.__li.style.borderLeft = '3px solid #8C8C8C';
-    let linkedinIcon = document.createElement('span');
-    linkedin.domElement.parentElement.appendChild(linkedinIcon);
-    linkedinIcon.className = 'icon linkedin';
-    
-//            let facebook = gui.add({ fun : () => {
-//        ga('send', 'event', 'link button', 'facebook');
-//        window.open('https://linkedin.com/company/omra-coffee-ltd');
-//    } }, 'fun').name('Facebook');
-//    facebook.__li.className = 'cr function bigFont';
-//    facebook.__li.style.borderLeft = '3px solid #8C8C8C';
-//    let facebookIcon = document.createElement('span');
-//    facebook.domElement.parentElement.appendChild(facebookIcon);
-//    facebookIcon.className = 'icon facebook';
-    
-//            let twitter = gui.add({ fun : () => {
-//        ga('send', 'event', 'link button', 'twitter');
-//        window.open('https://twitter.com/OmraCoffee');
-//    } }, 'fun').name('Twitter');
-//    twitter.__li.className = 'cr function bigFont';
-//    twitter.__li.style.borderLeft = '3px solid #8C8C8C';
-//    let twitterIcon = document.createElement('span');
-//    twitter.domElement.parentElement.appendChild(twitterIcon);
-//    twitterIcon.className = 'icon twitter';
-    
-
-    //if (isMobile())
-        //gui.close();
-}
+function startGUI () {}
 
 function isMobile () {
     return /Mobi|Android/i.test(navigator.userAgent);
@@ -1118,7 +1046,7 @@ function updateKeywords () {
 
 updateKeywords();
 initFramebuffers();
-multipleSplats(parseInt(Math.random() * 20) + 5);
+// Start with a clean espresso surface.
 
 let lastUpdateTime = Date.now();
 let colorUpdateTimer = 0.0;
@@ -1168,14 +1096,19 @@ function updateColors (dt) {
 }
 
 function applyInputs () {
-    if (splatStack.length > 0)
-        multipleSplats(splatStack.pop());
-
     pointers.forEach(p => {
-        if (p.moved) {
-            p.moved = false;
-            splatPointer(p);
+        if (!p.down) return;
+        if (p.moved) p.moved = false;
+        else {
+            p.deltaX = 0;
+            p.deltaY = 0;
         }
+        p.isPulling = omraShiftDown || p.shiftPull;
+        if (omraSpaceDown && p.flowLockDirection) {
+            p.deltaX = p.flowLockDirection.x;
+            p.deltaY = p.flowLockDirection.y;
+        }
+        splatPointer(p);
     });
 }
 
@@ -1370,9 +1303,12 @@ function blur (target, temp, iterations) {
 }
 
 function splatPointer (pointer) {
-    let dx = pointer.deltaX * config.SPLAT_FORCE;
-    let dy = pointer.deltaY * config.SPLAT_FORCE;
-    splat(pointer.texcoordX, pointer.texcoordY, dx, dy, pointer.color);
+    const force = config.SPLAT_FORCE * (pointer.isPulling ? 1.8 : 1.0) * (pointer.tool === 'toothpick' ? 0.42 : 1.0);
+    const dx = pointer.deltaX * force;
+    const dy = pointer.deltaY * force;
+    const color = pointer.tool === 'toothpick' ? { r: 0.48, g: 0.23, b: 0.105 } : pointer.color;
+    const radius = config.SPLAT_RADIUS * (pointer.isPulling ? 0.42 : (pointer.tool === 'toothpick' ? 0.34 : 1.0));
+    splat(pointer.texcoordX, pointer.texcoordY, dx, dy, color, radius);
 }
 
 function multipleSplats (amount) {
@@ -1389,13 +1325,13 @@ function multipleSplats (amount) {
     }
 }
 
-function splat (x, y, dx, dy, color) {
+function splat (x, y, dx, dy, color, radius) {
     splatProgram.bind();
     gl.uniform1i(splatProgram.uniforms.uTarget, velocity.read.attach(0));
     gl.uniform1f(splatProgram.uniforms.aspectRatio, canvas.width / canvas.height);
     gl.uniform2f(splatProgram.uniforms.point, x, y);
     gl.uniform3f(splatProgram.uniforms.color, dx, dy, 0.0);
-    gl.uniform1f(splatProgram.uniforms.radius, correctRadius(config.SPLAT_RADIUS / 100.0));
+    gl.uniform1f(splatProgram.uniforms.radius, correctRadius((radius || config.SPLAT_RADIUS) / 100.0));
     blit(velocity.write);
     velocity.swap();
 
@@ -1412,68 +1348,72 @@ function correctRadius (radius) {
     return radius;
 }
 
-canvas.addEventListener('mousedown', e => {
-    let posX = scaleByPixelRatio(e.offsetX);
-    let posY = scaleByPixelRatio(e.offsetY);
-    let pointer = pointers.find(p => p.id == -1);
-    if (pointer == null)
-        pointer = new pointerPrototype();
-    updatePointerDownData(pointer, -1, posX, posY);
-});
-
-canvas.addEventListener('mousemove', e => {
-    let pointer = pointers[0];
-    if (!pointer.down) return;
-    let posX = scaleByPixelRatio(e.offsetX);
-    let posY = scaleByPixelRatio(e.offsetY);
-    updatePointerMoveData(pointer, posX, posY);
-});
-
-window.addEventListener('mouseup', () => {
-    updatePointerUpData(pointers[0]);
-});
-
-canvas.addEventListener('touchstart', e => {
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
     e.preventDefault();
-    const touches = e.targetTouches;
-    while (touches.length >= pointers.length)
-        pointers.push(new pointerPrototype());
-    for (let i = 0; i < touches.length; i++) {
-        let posX = scaleByPixelRatio(touches[i].pageX);
-        let posY = scaleByPixelRatio(touches[i].pageY);
-        updatePointerDownData(pointers[i + 1], touches[i].identifier, posX, posY);
+    const rect = canvas.getBoundingClientRect();
+    let pointer = pointers.find(p => p.id === -1);
+    if (!pointer) { pointer = new pointerPrototype(); pointers.push(pointer); }
+    updatePointerDownData(pointer, e.pointerId, scaleByPixelRatio(e.clientX - rect.left), scaleByPixelRatio(e.clientY - rect.top));
+    omraLastDirection = null;
+    pointer.tool = omraTool;
+    pointer.color = pointer.tool === 'toothpick' ? { r: 0.48, g: 0.23, b: 0.105 } : generateColor();
+    pointer.shiftPull = e.shiftKey || omraShiftDown;
+    canvas.setPointerCapture(e.pointerId);
+    window.dispatchEvent(new Event('omra-pour-start'));
+});
+canvas.addEventListener('pointermove', e => {
+    const pointer = pointers.find(p => p.id === e.pointerId);
+    if (!pointer || !pointer.down) return;
+    const rect = canvas.getBoundingClientRect();
+    updatePointerMoveData(pointer, scaleByPixelRatio(e.clientX - rect.left), scaleByPixelRatio(e.clientY - rect.top));
+    pointer.shiftPull = e.shiftKey || omraShiftDown;
+    const movedX = pointer.deltaX, movedY = pointer.deltaY;
+    if ((movedX || movedY) && !omraSpaceDown) {
+        pointer.flowDirection = { x: movedX, y: movedY };
+        omraLastDirection = pointer.flowDirection;
+    } else if (omraSpaceDown && !pointer.flowLockDirection && (movedX || movedY)) {
+        pointer.flowLockDirection = { x: movedX, y: movedY };
     }
 });
-
-canvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    const touches = e.targetTouches;
-    for (let i = 0; i < touches.length; i++) {
-        let pointer = pointers[i + 1];
-        if (!pointer.down) continue;
-        let posX = scaleByPixelRatio(touches[i].pageX);
-        let posY = scaleByPixelRatio(touches[i].pageY);
-        updatePointerMoveData(pointer, posX, posY);
-    }
-}, false);
-
-window.addEventListener('touchend', e => {
-    const touches = e.changedTouches;
-    for (let i = 0; i < touches.length; i++)
-    {
-        let pointer = pointers.find(p => p.id == touches[i].identifier);
-        if (pointer == null) continue;
-        updatePointerUpData(pointer);
-    }
-});
-
+function finishPour (e) {
+    const pointer = pointers.find(p => p.id === e.pointerId);
+    if (!pointer || !pointer.down) return;
+    updatePointerUpData(pointer);
+    pointer.id = -1;
+    pointer.flowLockDirection = null;
+    pointer.shiftPull = false;
+    window.dispatchEvent(new Event('omra-pour-end'));
+}
+canvas.addEventListener('pointerup', finishPour);
+canvas.addEventListener('pointercancel', finishPour);
 window.addEventListener('keydown', e => {
-    if (e.code === 'KeyP')
-        config.PAUSED = !config.PAUSED;
-    if (e.key === ' ')
-        splatStack.push(parseInt(Math.random() * 20) + 5);
+    if (e.code === 'Space' && pointers.some(p => p.down)) {
+        e.preventDefault();
+        omraSpaceDown = true;
+        pointers.forEach(p => { if (p.down) p.flowLockDirection = p.flowDirection || null; });
+    }
+    if (e.key === 'Shift') {
+        omraShiftDown = true;
+        pointers.forEach(p => { if (p.down) p.shiftPull = true; });
+    }
 });
-
+window.addEventListener('keyup', e => {
+    if (e.code === 'Space') {
+        omraSpaceDown = false;
+        pointers.forEach(p => { p.flowLockDirection = null; });
+    }
+    if (e.key === 'Shift') {
+        omraShiftDown = false;
+        pointers.forEach(p => { p.shiftPull = false; });
+    }
+});
+window.addEventListener('blur', () => {
+    omraSpaceDown = false;
+    omraShiftDown = false;
+    pointers.forEach(p => { if (p.down) { updatePointerUpData(p); p.id = -1; } });
+});
 function updatePointerDownData (pointer, id, posX, posY) {
     pointer.id = id;
     pointer.down = true;
@@ -1484,7 +1424,11 @@ function updatePointerDownData (pointer, id, posX, posY) {
     pointer.prevTexcoordY = pointer.texcoordY;
     pointer.deltaX = 0;
     pointer.deltaY = 0;
-    pointer.color = generateColor();
+    pointer.flowDirection = null;
+    pointer.flowLockDirection = null;
+    pointer.tool = omraTool;
+    pointer.shiftPull = omraShiftDown;
+    pointer.color = pointer.tool === 'toothpick' ? { r: 0.48, g: 0.23, b: 0.105 } : generateColor();
 }
 
 function updatePointerMoveData (pointer, posX, posY) {
@@ -1612,4 +1556,15 @@ function hashCode (s) {
         hash |= 0; // Convert to 32bit integer
     }
     return hash;
+};
+
+window.omraSim = {
+    setHeight: function (height) {
+        omraHeight = height;
+        config.SPLAT_FORCE = height === 'high' ? 9800 : 6200;
+        config.SPLAT_RADIUS = height === 'high' ? 0.28 : 0.14;
+    },
+    setTool: function (tool) { omraTool = tool; },
+    reset: function () { initFramebuffers(); },
+    capture: function () { captureScreenshot(); }
 };
