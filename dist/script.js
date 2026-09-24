@@ -6,16 +6,16 @@ const canvas = document.getElementsByTagName('canvas')[0];
 resizeCanvas();
 
 let config = {
-    SIM_RESOLUTION: 32,
+    SIM_RESOLUTION: 64,
     DYE_RESOLUTION: 1024,
     CAPTURE_RESOLUTION: 1024,
-    DENSITY_DISSIPATION: 0.9,
-    VELOCITY_DISSIPATION: 1.8,
+    DENSITY_DISSIPATION: 0.0,
+    VELOCITY_DISSIPATION: 5.5,
     PRESSURE: 0.5,
     PRESSURE_ITERATIONS: 20,
-    CURL: 24,
+    CURL: 0,
     SPLAT_RADIUS: 0.14,
-    SPLAT_FORCE: 6200,
+    SPLAT_FORCE: 900,
     SHADING: true,
     COLORFUL: false,
     COLOR_UPDATE_SPEED: 10,
@@ -58,6 +58,7 @@ let omraLastDirection = null;
 const { gl, ext } = getWebGLContext(canvas);
 
 if (isMobile()) {
+    config.SIM_RESOLUTION = 48;
     config.DYE_RESOLUTION = 512;
 }
 if (!ext.supportLinearFiltering) {
@@ -1098,13 +1099,14 @@ function updateColors (dt) {
 function applyInputs () {
     pointers.forEach(p => {
         if (!p.down) return;
-        if (p.moved) p.moved = false;
+        const moved = p.moved;
+        if (moved) p.moved = false;
         else {
             p.deltaX = 0;
             p.deltaY = 0;
         }
         p.isPulling = omraShiftDown || p.shiftPull;
-        if (omraSpaceDown && p.flowLockDirection) {
+        if (moved && omraSpaceDown && p.flowLockDirection) {
             p.deltaX = p.flowLockDirection.x;
             p.deltaY = p.flowLockDirection.y;
         }
@@ -1304,9 +1306,12 @@ function blur (target, temp, iterations) {
 
 function splatPointer (pointer) {
     const force = config.SPLAT_FORCE * (pointer.isPulling ? 1.8 : 1.0) * (pointer.tool === 'toothpick' ? 0.42 : 1.0);
-    const dx = pointer.deltaX * force;
-    const dy = pointer.deltaY * force;
-    const color = pointer.tool === 'toothpick' ? { r: 0.48, g: 0.23, b: 0.105 } : pointer.color;
+    const dx = Math.max(-0.015, Math.min(0.015, pointer.deltaX)) * force;
+    const dy = Math.max(-0.015, Math.min(0.015, pointer.deltaY)) * force;
+    const milkStrength = omraHeight === 'high' ? 0.65 : 1.0;
+    const color = pointer.tool === 'toothpick'
+        ? { r: 0.48, g: 0.23, b: 0.105 }
+        : { r: pointer.color.r * milkStrength, g: pointer.color.g * milkStrength, b: pointer.color.b * milkStrength };
     const radius = config.SPLAT_RADIUS * (pointer.isPulling ? 0.42 : (pointer.tool === 'toothpick' ? 0.34 : 1.0));
     splat(pointer.texcoordX, pointer.texcoordY, dx, dy, color, radius);
 }
@@ -1460,10 +1465,10 @@ function correctDeltaY (delta) {
 function generateColor () {
     
     if (!config.COLORFUL) {
-        let c = HSVtoRGB(0.0, 0.0, 100.0);
-        c.r *= 0.15;
-        c.g *= 0.15;
-        c.b *= 0.15;
+        let c = HSVtoRGB(0.0, 0.0, 1.0);
+        c.r *= 0.25;
+        c.g *= 0.25;
+        c.b *= 0.25;
         return c;
     }
     
@@ -1561,7 +1566,7 @@ function hashCode (s) {
 window.omraSim = {
     setHeight: function (height) {
         omraHeight = height;
-        config.SPLAT_FORCE = height === 'high' ? 9800 : 6200;
+        config.SPLAT_FORCE = height === 'high' ? 1450 : 900;
         config.SPLAT_RADIUS = height === 'high' ? 0.28 : 0.14;
     },
     setTool: function (tool) { omraTool = tool; },
