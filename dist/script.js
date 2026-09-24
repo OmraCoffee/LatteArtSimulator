@@ -10,12 +10,12 @@ let config = {
     DYE_RESOLUTION: 1024,
     CAPTURE_RESOLUTION: 1024,
     DENSITY_DISSIPATION: 0.0,
-    VELOCITY_DISSIPATION: 5.5,
+    VELOCITY_DISSIPATION: 4.6,
     PRESSURE: 0.5,
     PRESSURE_ITERATIONS: 20,
     CURL: 0,
     SPLAT_RADIUS: 0.14,
-    SPLAT_FORCE: 900,
+    SPLAT_FORCE: 1050,
     SHADING: true,
     COLORFUL: false,
     COLOR_UPDATE_SPEED: 10,
@@ -1566,7 +1566,7 @@ function hashCode (s) {
 window.omraSim = {
     setHeight: function (height) {
         omraHeight = height;
-        config.SPLAT_FORCE = height === 'high' ? 1450 : 900;
+        config.SPLAT_FORCE = height === 'high' ? 1700 : 1050;
         config.SPLAT_RADIUS = height === 'high' ? 0.28 : 0.14;
     },
     setTool: function (tool) { omraTool = tool; },
